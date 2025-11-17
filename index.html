@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChurnPing - Automatically Spot At-Risk Users Before They Churn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.75;
+            color: #1f1f1f;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 50%, #f8f9fa 100%);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            letter-spacing: -0.011em;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            padding: 28px 0;
+            border-bottom: 1px solid #f0f0f0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        /* Coming Soon Badge */
+        .coming-soon-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 100px 0 120px;
+            text-align: center;
+            background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 28px;
+            color: #0a0a0a;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            letter-spacing: -0.03em;
+        }
+
+        .subheadline {
+            font-size: 22px;
+            color: #4a4a4a;
+            margin-bottom: 56px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 400;
+            line-height: 1.65;
+            letter-spacing: -0.01em;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            max-width: 500px;
+            margin: 0 auto 80px;
+        }
+
+        .early-access-note {
+            font-size: 14px;
+            color: #6b6b6b;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .email-input {
+            flex: 1;
+            padding: 18px 22px;
+            font-size: 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 10px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: #ffffff;
+            letter-spacing: -0.005em;
+        }
+
+        .email-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-btn {
+            padding: 18px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-family: inherit;
+            box-shadow: 0 4px 14px rgba(102, 126, 234, 0.25);
+            letter-spacing: -0.005em;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+        }
+
+        .no-spam {
+            font-size: 13px;
+            color: #9b9b9b;
+            text-align: center;
+        }
+
+        /* Visual Flow Section */
+        .visual-flow {
+            padding: 100px 0;
+            text-align: center;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 50%, #f8f9fa 100%);
+        }
+
+        .visual-flow h2 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 64px;
+            color: #0a0a0a;
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+        }
+
+        .flow-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .flow-step {
+            flex: 1;
+            min-width: 200px;
+            max-width: 240px;
+            padding: 40px 28px;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e8e8e8;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .flow-step:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border-color: #667eea;
+        }
+
+        .flow-step-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+        }
+
+        .flow-step h3 {
+            font-size: 21px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #0a0a0a;
+            letter-spacing: -0.01em;
+            line-height: 1.3;
+        }
+
+        .flow-step p {
+            font-size: 16px;
+            color: #5a5a5a;
+            line-height: 1.6;
+            letter-spacing: -0.005em;
+        }
+
+        .flow-arrow {
+            font-size: 28px;
+            color: #c0c0c0;
+            flex-shrink: 0;
+            font-weight: 300;
+        }
+
+        /* How It Works Section */
+        .how-it-works {
+            padding: 100px 0;
+            background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .how-it-works h2 {
+            font-size: 42px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #0a0a0a;
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+        }
+
+        .how-it-works-list {
+            max-width: 850px;
+            margin: 0 auto;
+            list-style: none;
+            padding: 0;
+            counter-reset: step-counter;
+        }
+
+        .how-it-works-list li {
+            padding: 32px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 24px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .how-it-works-list li:last-child {
+            border-bottom: none;
+        }
+
+        .how-it-works-list li::before {
+            content: counter(step-counter);
+            counter-increment: step-counter;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+            margin-top: 2px;
+        }
+
+        .how-it-works-content {
+            flex: 1;
+        }
+
+        .how-it-works-title {
+            font-size: 21px;
+            font-weight: 700;
+            color: #0a0a0a;
+            margin-bottom: 10px;
+            line-height: 1.35;
+            letter-spacing: -0.01em;
+        }
+
+        .how-it-works-description {
+            font-size: 18px;
+            color: #4a4a4a;
+            line-height: 1.7;
+            letter-spacing: -0.005em;
+        }
+
+        .how-it-works-intro {
+            text-align: center;
+            font-size: 19px;
+            color: #5a5a5a;
+            margin-bottom: 48px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+            letter-spacing: -0.01em;
+        }
+
+        /* Code Snippet */
+        .code-snippet {
+            background: #0f0f0f;
+            border-radius: 12px;
+            padding: 32px;
+            margin: 64px auto 0;
+            max-width: 750px;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 15px;
+            color: #e5e5e5;
+            text-align: left;
+            overflow-x: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            border: 1px solid #1f1f1f;
+            line-height: 1.6;
+        }
+
+        .code-snippet .code-line {
+            margin: 4px 0;
+        }
+
+        .code-snippet .keyword {
+            color: #c792ea;
+        }
+
+        .code-snippet .string {
+            color: #c3e88d;
+        }
+
+        .code-snippet .comment {
+            color: #6b6b6b;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 0;
+            background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .features h2 {
+            font-size: 42px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 64px;
+            color: #0a0a0a;
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            padding: 40px 32px;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e8e8e8;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border-color: #667eea;
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+        }
+
+        .feature-card h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: #0a0a0a;
+            letter-spacing: -0.01em;
+            line-height: 1.3;
+        }
+
+        .feature-card p {
+            font-size: 16px;
+            color: #5a5a5a;
+            line-height: 1.7;
+            letter-spacing: -0.005em;
+        }
+
+        /* Benefits Section */
+        .benefits {
+            padding: 100px 0;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 50%, #f8f9fa 100%);
+        }
+
+        .benefits h2 {
+            font-size: 42px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 24px;
+            color: #0a0a0a;
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+        }
+
+        .benefits-subtitle {
+            font-size: 19px;
+            color: #5a5a5a;
+            text-align: center;
+            margin-bottom: 64px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.65;
+            letter-spacing: -0.01em;
+        }
+
+        .benefits-list {
+            max-width: 850px;
+            margin: 0 auto;
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefits-list li {
+            padding: 32px 0;
+            font-size: 20px;
+            color: #3a3a3a;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-weight: 500;
+            line-height: 1.7;
+            letter-spacing: -0.005em;
+        }
+
+        .benefits-list li::before {
+            content: "✓";
+            color: #667eea;
+            font-weight: 700;
+            font-size: 28px;
+            flex-shrink: 0;
+            background: rgba(102, 126, 234, 0.1);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Early Access Section */
+        .early-access {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .early-access h2 {
+            font-size: 44px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: white;
+            letter-spacing: -0.025em;
+            line-height: 1.2;
+        }
+
+        .early-access p {
+            font-size: 21px;
+            margin-bottom: 40px;
+            opacity: 0.95;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.65;
+            letter-spacing: -0.01em;
+        }
+
+        .early-access .cta-section {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .early-access .email-input {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .early-access .email-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .early-access .email-input:focus {
+            border-color: white;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .early-access .submit-btn {
+            background: white;
+            color: #667eea;
+        }
+
+        .early-access .submit-btn:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .early-access .no-spam {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Footer */
+        footer {
+            padding: 60px 0 40px;
+            border-top: 1px solid #e5e5e5;
+            background: #ffffff;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+
+        .footer-logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #6b6b6b;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: #667eea;
+        }
+
+        .footer-copyright {
+            text-align: center;
+            color: #9b9b9b;
+            font-size: 14px;
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 60px 0 80px;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .subheadline {
+                font-size: 18px;
+            }
+
+            .form-group {
+                flex-direction: column;
+            }
+
+            .submit-btn {
+                width: 100%;
+            }
+
+            .how-it-works,
+            .benefits,
+            .visual-flow,
+            .early-access,
+            .features {
+                padding: 70px 0;
+            }
+
+            .how-it-works h2,
+            .benefits h2,
+            .visual-flow h2,
+            .early-access h2,
+            .features h2 {
+                font-size: 32px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flow-container {
+                flex-direction: column;
+            }
+
+            .flow-arrow {
+                transform: rotate(90deg);
+                margin: 8px 0;
+            }
+
+            .flow-step {
+                max-width: 100%;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .subheadline {
+                font-size: 16px;
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            .how-it-works h2,
+            .benefits h2,
+            .visual-flow h2,
+            .early-access h2,
+            .features h2 {
+                font-size: 28px;
+            }
+
+            .early-access p {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="#" class="logo">
+                    <div class="logo-icon">C</div>
+                    <span>ChurnPing</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="coming-soon-badge">Coming Soon</div>
+                <h1>Automatically Spot At-Risk Users Before They Churn</h1>
+                <p class="subheadline">Install a tiny SDK, track historical usage + Stripe data, and let AI generate retention emails — fully on autopilot.</p>
+                
+                <div class="cta-section">
+                    <form id="emailForm" onsubmit="handleSubmit(event)">
+                        <div class="form-group">
+                            <input 
+                                type="email" 
+                                class="email-input" 
+                                placeholder="Enter your email"
+                                required
+                                id="emailInput"
+                            >
+                            <button type="submit" class="submit-btn">Join Early Access & Get 20% Off</button>
+                        </div>
+                    </form>
+                    <p class="no-spam">No spam. Ever.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="visual-flow">
+            <div class="container">
+                <h2>How ChurnPing Works:</h2>
+                <div class="flow-container">
+                    <div class="flow-step">
+                        <div class="flow-step-icon">&lt;/&gt;</div>
+                        <h3>SDK</h3>
+                        <p>Quick setup with a few lines of code</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="flow-step-icon">📊</div>
+                        <h3>Data</h3>
+                        <p>Track usage & Stripe metrics</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="flow-step-icon">🤖</div>
+                        <h3>AI</h3>
+                        <p>Detect at-risk users automatically</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="flow-step-icon">✉️</div>
+                        <h3>Emails</h3>
+                        <p>Send retention emails instantly</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="how-it-works">
+            <div class="container">
+                <h2>How It Works</h2>
+                <ul class="how-it-works-list">
+                    <li>
+                        <div class="how-it-works-content">
+                            <div class="how-it-works-title">SDK Setup</div>
+                            <div class="how-it-works-description">Drop in the SDK and initialize with your API key. Works with any language — JavaScript, Python, Ruby, Go, and more.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="how-it-works-content">
+                            <div class="how-it-works-title">Historical Tracking</div>
+                            <div class="how-it-works-description">Builds a timeline of each user's behavior, engagement drops, and long-term trends.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="how-it-works-content">
+                            <div class="how-it-works-title">Stripe Integration</div>
+                            <div class="how-it-works-description">Track upgrades, downgrades, payment failures, and cancellations automatically.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="how-it-works-content">
+                            <div class="how-it-works-title">AI Insights</div>
+                            <div class="how-it-works-description">Understand exactly why users are at risk — and what to do next.</div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="how-it-works-content">
+                            <div class="how-it-works-title">Auto Emails</div>
+                            <div class="how-it-works-description">AI writes and sends personalized retention emails instantly or with one click.</div>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="code-snippet">
+                    <div class="code-line"><span class="comment">// Install</span></div>
+                    <div class="code-line"><span class="keyword">npm</span> <span class="keyword">install</span> <span class="string">churnping</span></div>
+                    <div class="code-line"></div>
+                    <div class="code-line"><span class="comment">// Initialize with API key</span></div>
+                    <div class="code-line"><span class="keyword">churnping</span>.<span class="keyword">init</span>(<span class="string">'your-api-key'</span>);</div>
+                    <div class="code-line"></div>
+                    <div class="code-line"><span class="comment">// Track usage with user ID and event type</span></div>
+                    <div class="code-line"><span class="keyword">churnping</span>.<span class="keyword">track</span>(<span class="string">userId</span>, <span class="string">'event_type'</span>);</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <h2>Everything You Need to Prevent Churn:</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📈</div>
+                        <h3>Real-time analytics</h3>
+                        <p>Monitor user engagement patterns and identify at-risk users as they happen. Get instant insights into usage trends and behavior changes.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔗</div>
+                        <h3>Automated Stripe monitoring</h3>
+                        <p>Connect your Stripe account via OAuth to automatically track subscription changes, payment failures, and billing events.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>AI-powered churn predictions</h3>
+                        <p>Our AI analyzes user behavior patterns to predict churn risk and provides actionable recommendations to keep users engaged.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">✉️</div>
+                        <h3>Personalized retention emails</h3>
+                        <p>AI-generated retention emails sent automatically or with one click. Personalize messages based on user behavior and risk level.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Lightweight SDK</h3>
+                        <p>Install in minutes with just a few lines of code. Works with any programming language and doesn't slow down your app.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Historical engagement trends</h3>
+                        <p>Track both past and present usage data to build comprehensive user profiles and identify long-term engagement trends.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="benefits">
+            <div class="container">
+                <h2>Key Benefits</h2>
+                <ul class="benefits-list">
+                    <li>Prevent churn before it happens.</li>
+                    <li>Keep revenue stable with automated monitoring.</li>
+                    <li>Save hours — AI writes emails for you.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="early-access">
+            <div class="container">
+                <h2>Get Early Access & Save 20%</h2>
+                <p>ChurnPing is coming soon. Provide your email and receive an exclusive 20% discount at launch.</p>
+                <div class="cta-section">
+                    <form id="earlyAccessForm" onsubmit="handleSubmit(event)">
+                        <div class="form-group">
+                            <input 
+                                type="email" 
+                                class="email-input" 
+                                placeholder="Enter your email"
+                                required
+                                id="earlyAccessInput"
+                            >
+                            <button type="submit" class="submit-btn">Join Early Access & Get 20% Off</button>
+                        </div>
+                    </form>
+                    <p class="no-spam">No spam. Ever.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <a href="#" class="footer-logo">
+                    <div class="footer-logo-icon">C</div>
+                    <span>ChurnPing</span>
+                </a>
+            </div>
+            <div class="footer-copyright">
+                <p>ChurnPing &copy; 2025. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const formId = event.target.id;
+            const emailInput = formId === 'emailForm' 
+                ? document.getElementById('emailInput')
+                : document.getElementById('earlyAccessInput');
+            const submitBtn = event.target.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            
+            const email = emailInput.value;
+            
+            // Update button state
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('https://p3y2fh5c0d.execute-api.us-east-1.amazonaws.com/submit-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+                
+                if (response.ok) {
+                    submitBtn.textContent = '✓ Joined!';
+                    submitBtn.style.background = '#10b981';
+                    emailInput.value = '';
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                        submitBtn.style.background = '';
+                    }, 3000);
+                } else {
+                    throw new Error('Submission failed');
+                }
+            } catch (error) {
+                submitBtn.textContent = 'Try Again';
+                submitBtn.style.background = '#ef4444';
+                
+                // Reset after 3 seconds
+                setTimeout(() => {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.style.background = '';
+                }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>
