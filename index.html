@@ -484,38 +484,59 @@
             letter-spacing: -0.01em;
         }
 
-        .benefits-list {
-            max-width: 850px;
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            max-width: 1100px;
             margin: 0 auto;
-            list-style: none;
-            padding: 0;
         }
 
-        .benefits-list li {
-            padding: 32px 0;
-            font-size: 20px;
-            color: #3a3a3a;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            font-weight: 500;
-            line-height: 1.7;
-            letter-spacing: -0.005em;
+        .benefit-card {
+            padding: 40px 32px;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e8e8e8;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
         }
 
-        .benefits-list li::before {
-            content: "✓";
-            color: #667eea;
-            font-weight: 700;
-            font-size: 28px;
-            flex-shrink: 0;
-            background: rgba(102, 126, 234, 0.1);
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
+        .benefit-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            border-color: #667eea;
+        }
+
+        .benefit-icon {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 24px;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+        }
+
+        .benefit-card h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #0a0a0a;
+            letter-spacing: -0.01em;
+            line-height: 1.3;
+        }
+
+        .benefit-card p {
+            font-size: 16px;
+            color: #5a5a5a;
+            line-height: 1.7;
+            letter-spacing: -0.005em;
+            margin: 0;
         }
 
         /* Early Access Section */
@@ -685,7 +706,8 @@
                 font-size: 32px;
             }
 
-            .features-grid {
+            .features-grid,
+            .benefits-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -897,11 +919,24 @@
         <section class="benefits">
             <div class="container">
                 <h2>Key Benefits</h2>
-                <ul class="benefits-list">
-                    <li>Prevent churn before it happens.</li>
-                    <li>Keep revenue stable with automated monitoring.</li>
-                    <li>Save hours — AI writes emails for you.</li>
-                </ul>
+                <p class="benefits-subtitle">Everything you need to reduce churn and keep your customers engaged</p>
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">🛡️</div>
+                        <h3>Prevent Churn Before It Happens</h3>
+                        <p>Identify at-risk users early with AI-powered insights and take proactive action before they cancel. Reduce churn rates significantly by addressing issues before customers decide to leave.</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">💰</div>
+                        <h3>Keep Revenue Stable</h3>
+                        <p>Maintain predictable revenue streams with automated monitoring that tracks subscription changes, payment failures, and engagement drops. Protect your MRR with real-time alerts and insights.</p>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">⚡</div>
+                        <h3>Save Hours Every Week</h3>
+                        <p>Let AI write personalized retention emails for you. No more manual email crafting—get instant, context-aware messages that resonate with each user's specific situation and risk level.</p>
+                    </div>
+                </div>
             </div>
         </section>
 
